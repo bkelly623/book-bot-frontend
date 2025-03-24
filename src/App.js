@@ -21,31 +21,49 @@ function App() {
       return;
     }
 
-    // TODO: Replace with real API call to backend
-    const fakeResponse = `Here are 3 great books in the "${genre}" genre:\n1. Book One\n2. Book Two\n3. Book Three`;
-    setRecommendations(fakeResponse);
+    try {
+      const response = await fetch('https://book-bot-backend.onrender.com/recommend', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ genre }),
+      });
 
-    const newCount = useCount + 1;
-    setUseCount(newCount);
-    localStorage.setItem('useCount', newCount);
+      const data = await response.json();
+      setRecommendations(data.recommendations);
+
+      const newCount = useCount + 1;
+      setUseCount(newCount);
+      localStorage.setItem('useCount', newCount);
+    } catch (error) {
+      console.error('Error fetching recommendations:', error);
+    }
   };
 
-  const handleEmailSubmit = (e) => {
+  const handleEmailSubmit = async (e) => {
     e.preventDefault();
 
-    // TODO: Send email + genre to backend
-    console.log('User email:', email);
-    console.log('Preferred genre:', genre);
+    try {
+      await fetch('https://book-bot-backend.onrender.com/save-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, genre }),
+      });
 
-    alert("Thanks! You're now signed up.");
-
-    setShowModal(false);
-    localStorage.setItem('useCount', 0); // Reset usage count after signup
+      alert("Thanks! You're now signed up.");
+      setShowModal(false);
+      localStorage.setItem('useCount', 0); // Reset usage count after signup
+    } catch (error) {
+      console.error('Error saving email:', error);
+    }
   };
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'Arial' }}>
-      <h1>📚 Book Recommendation Bot</h1>
+      <h1>📚Book Recommendation Bot</h1>
       <form onSubmit={handleSubmit}>
         <label>
           What genre do you like?
